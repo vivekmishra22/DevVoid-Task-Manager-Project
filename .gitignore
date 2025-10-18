@@ -2,9 +2,11 @@
 
 # dependencies
 /backend/node_modules
+/frontend/node_modules
 /.pnp
 .pnp.js
 /backend/.env
+/frontend/.env
 
 
 # testing
