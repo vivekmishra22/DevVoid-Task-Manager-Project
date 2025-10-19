@@ -271,6 +271,7 @@ const KanbanBoard = () => {
 };
 
 export default KanbanBoard;
+// export default KanbanBoard;
 
 // import React, { useState, useEffect, useCallback } from 'react';
 // import { useParams, useNavigate } from 'react-router-dom';
