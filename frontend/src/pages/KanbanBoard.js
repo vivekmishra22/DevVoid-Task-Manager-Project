@@ -10,7 +10,6 @@ import {
   DragOverlay
 } from '@dnd-kit/core';
 import {
-  // arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
@@ -70,13 +69,16 @@ const KanbanBoard = () => {
 
   // Use useCallback to memoize the function and avoid infinite re-renders
   const fetchTasks = useCallback(async () => {
-    try {
-      const response = await getTasksByProject(projectId);
-      setTasks(response.data);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-    }
-  }, [projectId]);
+  try {
+    console.log('🔄 Fetching tasks for project:', projectId);
+    const response = await getTasksByProject(projectId);
+    console.log('✅ Tasks fetched:', response.data.length, 'tasks');
+    setTasks(response.data);
+  } catch (error) {
+    console.error('❌ Error fetching tasks:', error);
+    alert('Failed to load tasks. Please refresh the page.');
+  }
+}, [projectId]);
 
   useEffect(() => {
     fetchTasks();
@@ -271,197 +273,3 @@ const KanbanBoard = () => {
 };
 
 export default KanbanBoard;
-// export default KanbanBoard;
-
-// import React, { useState, useEffect, useCallback } from 'react';
-// import { useParams, useNavigate } from 'react-router-dom';
-// import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-// import { getTasksByProject, createTask, updateTaskPosition } from '../services/api';
-// import TaskCard from '../components/TaskCard';
-// import AIChat from '../components/AIChat';
-// import '../styles/KanbanBoard.css';
-
-// const KanbanBoard = () => {
-//   const { projectId } = useParams();
-//   const navigate = useNavigate();
-//   const [tasks, setTasks] = useState([]);
-//   const [showTaskForm, setShowTaskForm] = useState(false);
-//   const [newTask, setNewTask] = useState({ title: '', description: '', status: 'todo' });
-//   const [showAIChat, setShowAIChat] = useState(false);
-
-//   // Use useCallback to memoize the function and avoid infinite re-renders
-//   const fetchTasks = useCallback(async () => {
-//     try {
-//       const response = await getTasksByProject(projectId);
-//       setTasks(response.data);
-//     } catch (error) {
-//       console.error('Error fetching tasks:', error);
-//     }
-//   }, [projectId]);
-
-//   useEffect(() => {
-//     fetchTasks();
-//   }, [fetchTasks]);
-
-//   const handleDragEnd = async (result) => {
-//     if (!result.destination) return;
-
-//     const { draggableId, destination } = result;
-    
-//     try {
-//       await updateTaskPosition(draggableId, {
-//         status: destination.droppableId,
-//         position: destination.index
-//       });
-      
-//       fetchTasks(); // Refresh tasks
-//     } catch (error) {
-//       console.error('Error updating task position:', error);
-//     }
-//   };
-
-//   const handleCreateTask = async (e) => {
-//     e.preventDefault();
-//     try {
-//       await createTask({ ...newTask, projectId });
-//       setNewTask({ title: '', description: '', status: 'todo' });
-//       setShowTaskForm(false);
-//       fetchTasks();
-//     } catch (error) {
-//       console.error('Error creating task:', error);
-//     }
-//   };
-
-//   const columns = [
-//     { id: 'todo', title: 'To Do', color: '#ff6b6b' },
-//     { id: 'inProgress', title: 'In Progress', color: '#4ecdc4' },
-//     { id: 'done', title: 'Done', color: '#1a936f' }
-//   ];
-
-//   const getTasksByStatus = (status) => {
-//     return tasks.filter(task => task.status === status)
-//                .sort((a, b) => a.position - b.position);
-//   };
-
-//   return (
-//     <div className="kanban-board">
-//       <div className="board-header">
-//         <button className="btn-back" onClick={() => navigate('/')}>
-//           ← Back to Projects
-//         </button>
-//         <div className="board-actions">
-//           <button 
-//             className="btn-primary"
-//             onClick={() => setShowTaskForm(true)}
-//           >
-//             + Add Task
-//           </button>
-//           <button 
-//             className="btn-ai"
-//             onClick={() => setShowAIChat(true)}
-//           >
-//             🤖 AI Assistant
-//           </button>
-//         </div>
-//       </div>
-
-//       {showTaskForm && (
-//         <div className="task-form-overlay">
-//           <div className="task-form">
-//             <h3>Create New Task</h3>
-//             <form onSubmit={handleCreateTask}>
-//               <input
-//                 type="text"
-//                 placeholder="Task Title"
-//                 value={newTask.title}
-//                 onChange={(e) => setNewTask({...newTask, title: e.target.value})}
-//                 required
-//               />
-//               <textarea
-//                 placeholder="Task Description"
-//                 value={newTask.description}
-//                 onChange={(e) => setNewTask({...newTask, description: e.target.value})}
-//               />
-//               <select
-//                 value={newTask.status}
-//                 onChange={(e) => setNewTask({...newTask, status: e.target.value})}
-//               >
-//                 <option value="todo">To Do</option>
-//                 <option value="inProgress">In Progress</option>
-//                 <option value="done">Done</option>
-//               </select>
-//               <div className="form-actions">
-//                 <button type="submit" className="btn-primary">Create Task</button>
-//                 <button 
-//                   type="button" 
-//                   className="btn-secondary"
-//                   onClick={() => setShowTaskForm(false)}
-//                 >
-//                   Cancel
-//                 </button>
-//               </div>
-//             </form>
-//           </div>
-//         </div>
-//       )}
-
-//       {showAIChat && (
-//         <AIChat 
-//           projectId={projectId}
-//           onClose={() => setShowAIChat(false)}
-//         />
-//       )}
-
-//       <DragDropContext onDragEnd={handleDragEnd}>
-//         <div className="board-columns">
-//           {columns.map(column => (
-//             <div key={column.id} className="board-column">
-//               <div className="column-header" style={{ borderTopColor: column.color }}>
-//                 <h3>{column.title}</h3>
-//                 <span className="task-count">
-//                   {getTasksByStatus(column.id).length}
-//                 </span>
-//               </div>
-              
-//               <Droppable droppableId={column.id}>
-//                 {(provided, snapshot) => (
-//                   <div
-//                     ref={provided.innerRef}
-//                     {...provided.droppableProps}
-//                     className={`task-list ${snapshot.isDraggingOver ? 'dragging-over' : ''}`}
-//                   >
-//                     {getTasksByStatus(column.id).map((task, index) => (
-//                       <Draggable
-//                         key={task._id}
-//                         draggableId={task._id}
-//                         index={index}
-//                       >
-//                         {(provided, snapshot) => (
-//                           <div
-//                             ref={provided.innerRef}
-//                             {...provided.draggableProps}
-//                             {...provided.dragHandleProps}
-//                             className={`task-draggable ${snapshot.isDragging ? 'dragging' : ''}`}
-//                           >
-//                             <TaskCard 
-//                               task={task} 
-//                               onUpdate={fetchTasks}
-//                               onDelete={fetchTasks}
-//                             />
-//                           </div>
-//                         )}
-//                       </Draggable>
-//                     ))}
-//                     {provided.placeholder}
-//                   </div>
-//                 )}
-//               </Droppable>
-//             </div>
-//           ))}
-//         </div>
-//       </DragDropContext>
-//     </div>
-//   );
-// };
-
-// export default KanbanBoard;

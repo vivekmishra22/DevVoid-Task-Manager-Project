@@ -18,7 +18,7 @@ app.use('/api/ai', require('./routes/aiRoutes'));
 app.use(require('./middleware/errorMiddleware'));
 
 // Database Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/taskmanager')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/taskmanager')
   .then(() => console.log('MongoDB Connected'))
   .catch(err => console.log(err));
 
